@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mini LLM Cosmic</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<canvas id="stars"></canvas>
+
+<div class="main">
+
+    <h1>VELENTENA AI</h1>
+
+    <div class="input-area">
+        <input id="prompt" placeholder="Ask something in the universe...">
+        <button onclick="generate()" id="btn">Generate</button>
+    </div>
+
+    <div id="output">I WILL SAY SOMETHING WRITE TEXT ABOVE</div>
+
+</div>
+
+<script>
+async function generate() {
+    let prompt = document.getElementById("prompt").value;
+    let output = document.getElementById("output");
+
+    if (!prompt) {
+        output.innerText = "Enter something...";
+        return;
+    }
+
+    output.innerText = "Thinking...";
+
+    let res = await fetch("/generate", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({prompt})
+    });
+
+    let data = await res.json();
+    output.innerText = data.response;
+}
+
+const canvas = document.getElementById("stars");
+const ctx = canvas.getContext("2d");
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+let stars = [];
+for (let i = 0; i < 300; i++) {
+    stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 2,
+        speed: Math.random() * 0.5
+    });
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    stars.forEach(star => {
+        star.y += star.speed;
+        if (star.y > canvas.height) {
+            star.y = 0;
+            star.x = Math.random() * canvas.width;
+        }
+
+        ctx.fillStyle = "white";
+        ctx.fillRect(star.x, star.y, star.size, star.size);
+    });
+
+    requestAnimationFrame(animate);
+}
+animate();
+</script>
+
+</body>
+</html>
